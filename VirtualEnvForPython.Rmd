@@ -1,0 +1,248 @@
+---
+title: "Virtual Environments on Sherlock and Sherlock2"
+author: "Balasubramanian Narasimhan"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+## Introduction
+
+Here I am addressing a specific problem: that of installing a python
+library for use in a cluster job.  The library in question is 
+[`selective_inference`](https://github.com/selective-inference) by our
+own Jonathan Taylor.
+
+The actual question asked of me was more involved: the user wanted to
+use the selective inference package from within Matlab! So this
+solution addresses that as well.
+
+The best way to do this is to use virtual environments. Ananconda
+provides its own commands as does the standard python.  So I have
+examples of both below.
+
+
+## 1. Setting up a virtual environment
+
+We will create a virtual environment called `sel_inf` for our package.
+
+This works both on your laptop and on the `sherlock` cluster although on
+the `sherlock` cluster, you need to do the following first.
+
+### 1.1. On `sherlock`
+
+```
+module load anaconda/anaconda.4.4.0.python2.7
+```
+### 1.2. On `sherlock2`
+
+```{bash, eval = FALSE}
+module load python/2.7.13
+```
+
+## 2. One time configuration
+
+### 2.1. On `sherlock`
+
+1. Create a virtual environment.
+
+```{bash, eval = FALSE}
+conda create --name sel_inf
+```
+
+2. We activate the environment.
+
+```{bash, eval = FALSE}
+source activate sel_inf
+```
+You should see your shell prompt change to reflect that everything you
+do so henceforth only apply to the w`sel_inf` environment.
+
+3. We install all the requisite packages for selective inference as
+  noted in our `sel_inf` virtual environment per
+  the
+  [INSTALL](https://github.com/jonathan-taylor/selective-inference/blob/master/INSTALL) document. 
+  
+```{bash, eval = FALSE}
+conda install scikit-learn scipy numpy cython mpmath
+```
+
+Some other packages have to be installed manually.
+
+```{bash, eval = FALSE}
+pip install pyinter
+```
+
+The package `regreg` requires more work and we will use a temporary
+directory that can be deleted after our work.
+
+```{bash, eval = FALSE}
+mkdir ~/tmp
+cd ~/tmp
+git clone https://github.com/regreg/regreg.git
+cd regreg
+python setup.py install 
+```
+4. We are now ready to install `selective-inference` itself.
+
+```{bash, eval = FALSE}
+cd ~/tmp
+git clone https://github.com/selective-inference/Python-software.git
+cd Python-software
+```
+
+Before we install, there is a problem with this package and a quick
+edit is necessary to install it. The command below will edit out the
+offending line.
+
+```{bash, eval = FALSE}
+sed -i.bak -e "`grep -n SKLEARN setup.py | cut -f1 -d':'`d" setup.py
+```
+
+Then we can do
+
+```{bash, eval = FALSE}
+python setup.py install
+```
+
+6. We can now deactivate the environment, but it is still there for us
+to use any time.
+
+```{bash, eval = FALSE}
+source deactivate
+```
+
+### 2.2. On `sherlock2`
+
+1. Create a virtual environment in your home directory.
+
+```{bash, eval = FALSE}
+virtualenv sel_inf
+```
+
+This will create a new folder called `sel_inf` with stuff copied
+in. Note that I assume this is in your home directory in all that
+follows. 
+
+2. We activate the environment.
+
+```{bash, eval = FALSE}
+source sel_inf/bin/activate
+```
+You should see your shell prompt change to reflect that everything you
+do so henceforth only apply to the w`sel_inf` environment.
+
+3. We install all the requisite packages for selective inference as
+  noted in our `sel_inf` virtual environment per
+  the
+  [INSTALL](https://github.com/jonathan-taylor/selective-inference/blob/master/INSTALL) document. 
+  
+```{bash, eval = FALSE}
+pip install cython numpy scipy scikit-learn mpmath
+```
+
+The package `regreg` requires more work and we will use a temporary
+directory that can be deleted after our work.
+
+```{bash, eval = FALSE}
+mkdir ~/tmp
+cd ~/tmp
+git clone https://github.com/regreg/regreg.git
+cd regreg
+python setup.py install 
+```
+4. We are now ready to install `selective-inference` itself.
+
+```{bash, eval = FALSE}
+cd ~/tmp
+git clone https://github.com/selective-inference/Python-software.git
+cd Python-software
+```
+
+Before we install, there is a problem with this package and a quick
+edit is necessary to install it. The command below will edit out the
+offending line.
+
+```{bash, eval = FALSE}
+sed -i.bak -e "`grep -n SKLEARN setup.py | cut -f1 -d':'`d" setup.py
+```
+
+Then we can do
+
+```{bash, eval = FALSE}
+python setup.py install
+```
+
+6. We can now deactivate the environment, but it is still there for us
+to use any time.
+
+```{bash, eval = FALSE}
+deactivate
+```
+
+## 3. Using your virtual environment 
+
+### 3.1. On `sherlock`
+
+To use the created virtual environment on sherlock, just use the
+following incantation in your job script. (What follows is just an
+example, so you might change the `SBATCH` commands for example)
+
+```{bash, eval = FALSE}
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --time=1:0:0
+
+# Load Ananconda module
+module load anaconda/anaconda.4.4.0.python2.7
+
+# Activate the selective inference environment
+source activate sel_inf
+     
+# Rest of your code goes here, for example a matlab job
+# I am just copying what you gave me     
+module load math
+module load matlab
+export TZ=America/Los_Angeles
+unset _JAVA_OPTIONS
+
+# echo "I am here"
+matlab -nodisplay -nosplash -nodesktop -r "seed = $1; Run_all_experiments_cluster;"
+echo "$1 Matlab script done"
+
+# This matlab job can call python for example and use the selective      
+# Finally deactivate the selective inference environment     
+source deactivate
+```
+
+### 3.2. On `sherlock2`
+
+To use the created virtual environment on sherlock, just use the
+following incantation in your job script. (What follows is just an
+example, so you might change the `SBATCH` commands for example)
+
+```{bash, eval = FALSE}
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --time=1:0:0
+
+# Load Python module
+module load python/2.7.13
+
+# Activate the selective inference environment
+source ~/sel_inf/bin/activate
+     
+# Rest of your code goes here, for example your matlab jobs
+# I am just copying what you gave me     
+module load math
+module load matlab
+export TZ=America/Los_Angeles
+unset _JAVA_OPTIONS
+
+# echo "I am here"
+matlab -nodisplay -nosplash -nodesktop -r "seed = $1; Run_all_experiments_cluster;"
+echo "$1 Matlab script done"
+
+# Finally deactivate the selective inference environment     
+deactivate
+       
+```
