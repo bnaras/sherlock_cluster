@@ -179,7 +179,13 @@ to use any time.
 deactivate
 ```
 
+Once these packages are installed, the `tmp` folder can be cleared. 
+
+
 ## 3. Using your virtual environment 
+
+The example below is a matlab lab job that  can call python for
+example and use the selective inference package.
 
 ### 3.1. On `sherlock`
 
@@ -209,7 +215,6 @@ unset _JAVA_OPTIONS
 matlab -nodisplay -nosplash -nodesktop -r "seed = $1; Run_all_experiments_cluster;"
 echo "$1 Matlab script done"
 
-# This matlab job can call python for example and use the selective      
 # Finally deactivate the selective inference environment     
 source deactivate
 ```
