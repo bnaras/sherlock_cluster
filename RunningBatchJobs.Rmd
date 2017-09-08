@@ -100,8 +100,8 @@ saveRDS(result, file = sprintf("<jobname>-%d.RDS", paramRowIndex))
 ## End of problem dependent section
 ```
 
-3. Use the _job_ template below.  Edit it suitably and save in
-   `job_template.sh`. _Note that `sherlock` and `sherlock2` differ in
+3. Use the _job_ template below.  Edit it suitably.
+   _Note that `sherlock` and `sherlock2` differ in
    what modules are available._
    
    Here is an explanation of the items.
