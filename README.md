@@ -5,3 +5,4 @@ questions.
 
 - [Running Batch Jobs](RunningBatchJobs.Rmd)
 - [Virtual Environment for Python](VirtualEnvForPython.Rmd)
+- [CVX Setup for Matlab](CVX_Setup.Rmd)

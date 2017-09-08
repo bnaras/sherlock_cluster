@@ -1,0 +1,67 @@
+---
+title: "Setting up CVX on Sherlock/Sherlock2"
+author: "Balasubramanian Narasimhan"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+## Introduction
+
+The goal is to ensure CVX is available for `matlab` after a one-time installation.
+
+
+## 2. One time setup for CVX
+
+### 2.1. Load the modules
+
+If you want to use Gurobi or other solvers, make sure you load those
+modules as well before loading matlab. As far as I can tell, such
+commercial solvers require a commercial version of `cvx` as well!
+
+```{bash, eval = FALSE}
+module load matlab/R2016b
+```
+
+The module for `matlab` on `sherlock2` might be different. 
+
+### 2.2. Download and INSTALL CVX
+
+Do this in your home directory on `sherlock` or `sherlock2`.
+
+```{bash, eval = FALSE}
+cd
+curl -O http://web.cvxr.com/cvx/cvx-a64.tar.gz
+tar xzf cvx-a64.tar.gz
+```
+
+Then run `cvx_setup` after firing up matlab
+
+```{bash, eval = FALSE}
+matlab -nosplash -nodesktop -nojvm
+```
+
+Then type the following matlab commands
+
+```
+cd cvx
+cvx_setup
+```
+This will install CVX and set up the paths.
+
+### 2.3. Create a startup file for CVX
+
+
+_Note:_ `sherlock2` home directory is different from `sherlock`:
+`/home/users/candes` rather than `/home/candes`.
+
+Create a `startup.m` file containing these two lines below. 
+
+```
+addpath /home/candes/cvx
+cvx_startup
+```
+
+## 3. Create jobs the usual way
+
+Make sure that the above `startup.m` file is always copied to the job
+directory.
