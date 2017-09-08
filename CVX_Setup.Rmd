@@ -52,12 +52,12 @@ This will install CVX and set up the paths.
 
 
 _Note:_ `sherlock2` home directory is different from `sherlock`:
-`/home/users/candes` rather than `/home/candes`.
+`/home/users/<sunet>` rather than `/home/<sunet>`.
 
 Create a `startup.m` file containing these two lines below. 
 
 ```
-addpath /home/candes/cvx
+addpath /home/<sunet>/cvx
 cvx_startup
 ```
 
